@@ -10,23 +10,27 @@ import React, {
 
 interface ThemeContextType {
   theme: string;
-  toggleTheme: () => void;
+  toggleTheme: (theme: string) => void;
 }
 
-const ThemeContext = createContext<ThemeContextType | {}>({});
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   const [theme, setTheme] = useState("dark");
 
   const toggleTheme = useCallback(() => {
-    if (theme === "dark") {
-      setTheme("light");
-      document.documentElement.classList.add("light");
-    } else {
+    if (
+      localStorage.getItem("theme") === "dark" ||
+      (!("theme" in localStorage) &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches)
+    ) {
       setTheme("dark");
-      document.documentElement.classList.remove("light");
+      document.documentElement.classList.add("dark");
+    } else {
+      setTheme("light");
+      document.documentElement.classList.remove("dark");
     }
-  }, [theme]);
+  }, []);
 
   useEffect(() => {
     toggleTheme();
