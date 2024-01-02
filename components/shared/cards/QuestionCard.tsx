@@ -14,7 +14,7 @@ interface QuestionProps {
     name: string;
     picture: string;
   };
-  upvotes: number;
+  upvotes: Array<Object>;
   views: number;
   answers: Array<Object>;
   createdAt: Date;
@@ -38,16 +38,16 @@ const QuestionCard = ({
             <span className="subtle-regular text-dark400_light700 line-clamp-1 flex sm:hidden">
               {getTimestamp(createdAt)}
             </span>
+            <Link href={`/questions/${_id}`}>
+              <p className="sm:h3-semibold base-semibold text-dark200_light900 line-clamp-1 flex-1">
+                {title}
+              </p>
+            </Link>
           </div>
-          <Link href={`/questions/${_id}`}>
-            <p className="sm:h3-semibold base-semibold text-dark200_light900 line-clamp-1">
-              {title}
-            </p>
-          </Link>
         </div>
         <div className="mt-3.5 flex flex-wrap gap-2">
           {tags.map((tag) => (
-            <RenderTag key={tag._id} {...tag} />
+            <RenderTag key={tag._id} _id={tag._id} name={tag.name} />
           ))}
         </div>
       </CardContent>
@@ -65,7 +65,7 @@ const QuestionCard = ({
           imgUrl={"/assets/icons/like.svg"}
           alt="Upvotes"
           text="Votes"
-          value={formatNumber(upvotes)}
+          value={formatNumber(upvotes?.length | 0)}
           textStyle="small-medium text-dark400_light800"
         />
         <Metrics

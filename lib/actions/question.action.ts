@@ -1,15 +1,32 @@
 "use server";
 
 import Question from "@/database/models/QuestionSchema.model";
-import { connectDB } from "../db";
+import User from "@/database/models/UserSchema.model";
 import Tag from "@/database/models/TagSchema.model";
+import { connectDB } from "../db";
+import { CreateQuestionParams, GetQuestionsParams } from "./shared.types";
+import { revalidatePath } from "next/cache";
 
-export async function createQuestion(params: any) {
+export const getQuestions = async (params: GetQuestionsParams) => {
   try {
     connectDB();
-    console.log("connected");
-    const { title, description, tags, author } = params;
-    console.log(title);
+
+    const questions = await Question.find({})
+      .populate({ path: "tags", model: Tag })
+      .populate({ path: "author", model: User })
+      .sort({ createdAt: -1 });
+
+    return { questions };
+  } catch (err) {
+    console.log(err);
+    throw err;
+  }
+};
+
+export async function createQuestion(params: CreateQuestionParams) {
+  try {
+    connectDB();
+    const { title, description, tags, author, path } = params;
 
     const newQuestion = await Question.create({
       title,
@@ -30,6 +47,7 @@ export async function createQuestion(params: any) {
     await Question.findByIdAndUpdate(newQuestion._id, {
       $push: { tags: { $each: tagsArray } },
     });
+    revalidatePath(path);
   } catch (err) {
     console.log(err);
   }
