@@ -20,7 +20,6 @@ import { Badge } from "../ui/badge";
 import Image from "next/image";
 import { createQuestion } from "@/lib/actions/question.action";
 import { useRouter, usePathname } from "next/navigation";
-import { type } from "os";
 
 interface Props {
   type?: string;
@@ -98,6 +97,8 @@ const Question = ({ userId }: Props) => {
 
     form.setValue("tags", newTags);
   };
+
+  const type: any = "Create";
 
   return (
     <Form {...form}>
