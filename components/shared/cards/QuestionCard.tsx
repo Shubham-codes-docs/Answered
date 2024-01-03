@@ -12,7 +12,7 @@ interface QuestionProps {
   author: {
     _id: string;
     name: string;
-    picture: string;
+    image: string;
   };
   upvotes: Array<Object>;
   views: number;
@@ -53,7 +53,7 @@ const QuestionCard = ({
       </CardContent>
       <CardFooter className="flex-between mt-6 w-full flex-wrap gap-3">
         <Metrics
-          imgUrl={"/assets/icons/avatar.svg"}
+          imgUrl={author.image}
           alt="user"
           text={` - asked ${getTimestamp(createdAt)}`}
           value={author.name}
