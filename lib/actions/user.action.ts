@@ -4,12 +4,27 @@ import { connectDB } from "../db";
 import {
   CreateUserParams,
   DeleteUserParams,
+  GetAllUsersParams,
+  GetUserByIdParams,
   UpdateUserParams,
 } from "./shared.types";
 import { revalidatePath } from "next/cache";
 import Question from "@/database/models/QuestionSchema.model";
 
-export const getUserById = async (params: any) => {
+// get all users
+export const getAllUsers = async (params: GetAllUsersParams) => {
+  try {
+    connectDB();
+
+    const users = await User.find({}).sort({ createdAt: -1 });
+    return { users };
+  } catch (err) {
+    console.log(err);
+    throw err;
+  }
+};
+
+export const getUserById = async (params: GetUserByIdParams) => {
   try {
     connectDB();
 
