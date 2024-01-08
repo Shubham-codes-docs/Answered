@@ -2,7 +2,21 @@
 
 import User from "@/database/models/UserSchema.model";
 import { connectDB } from "../db";
-import { GetTopInteractedTagsParams } from "./shared.types";
+import { GetAllTagsParams, GetTopInteractedTagsParams } from "./shared.types";
+import Tag from "@/database/models/TagSchema.model";
+
+export const getAllTags = async (params: GetAllTagsParams) => {
+  try {
+    connectDB();
+
+    const tags = await Tag.find({});
+
+    return { tags };
+  } catch (err) {
+    console.log(err);
+    return { tags: [] };
+  }
+};
 
 export const getTopInteractedTags = async (
   params: GetTopInteractedTagsParams
@@ -17,21 +31,24 @@ export const getTopInteractedTags = async (
       throw new Error("User not found");
     }
 
-    return [
-      {
-        _id: "1",
-        name: "tag1",
-      },
-      {
-        _id: "2",
-        name: "tag2",
-      },
-      {
-        _id: "3",
-        name: "tag3",
-      },
-    ];
+    return {
+      tags: [
+        {
+          _id: "1",
+          name: "tag1",
+        },
+        {
+          _id: "2",
+          name: "tag2",
+        },
+        {
+          _id: "3",
+          name: "tag3",
+        },
+      ],
+    };
   } catch (err) {
     console.log(err);
+    return { tags: [] };
   }
 };

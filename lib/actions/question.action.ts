@@ -4,7 +4,11 @@ import Question from "@/database/models/QuestionSchema.model";
 import User from "@/database/models/UserSchema.model";
 import Tag from "@/database/models/TagSchema.model";
 import { connectDB } from "../db";
-import { CreateQuestionParams, GetQuestionsParams } from "./shared.types";
+import {
+  CreateQuestionParams,
+  GetQuestionByIdParams,
+  GetQuestionsParams,
+} from "./shared.types";
 import { revalidatePath } from "next/cache";
 
 export const getQuestions = async (params: GetQuestionsParams) => {
@@ -17,6 +21,28 @@ export const getQuestions = async (params: GetQuestionsParams) => {
       .sort({ createdAt: -1 });
 
     return { questions };
+  } catch (err) {
+    console.log(err);
+    throw err;
+  }
+};
+
+export const getQuestionById = async (params: GetQuestionByIdParams) => {
+  try {
+    connectDB();
+
+    const { questionId } = params;
+
+    const question = await Question.findById(questionId)
+      .populate({ path: "tags", model: Tag, select: "_id name" })
+      .populate({
+        path: "author",
+        model: User,
+        select: "_id clerkId name image",
+      });
+    if (!question) throw new Error("Question not found");
+
+    return { question };
   } catch (err) {
     console.log(err);
     throw err;
