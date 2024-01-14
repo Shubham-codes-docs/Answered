@@ -20,6 +20,7 @@ import { Badge } from "../ui/badge";
 import Image from "next/image";
 import { createQuestion } from "@/lib/actions/question.action";
 import { useRouter, usePathname } from "next/navigation";
+import { useTheme } from "@/context/ThemeProvider";
 
 interface Props {
   type?: string;
@@ -30,6 +31,8 @@ interface Props {
 const Question = ({ userId }: Props) => {
   const editorRef = useRef(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const theme = useTheme();
+  const mode = theme.theme;
   const router = useRouter();
   const pathname = usePathname();
 
@@ -172,6 +175,8 @@ const Question = ({ userId }: Props) => {
                       "codesample | bold italic forecolor | alignleft aligncenter |" +
                       "alignright alignjustify | bullist numlist",
                     content_style: "body { font-family:Inter; font-size:16px }",
+                    skin: mode === "dark" ? "oxide-dark" : "oxide",
+                    content_css: mode === "dark" ? "dark" : "light",
                   }}
                 />
               </FormControl>
@@ -235,9 +240,6 @@ const Question = ({ userId }: Props) => {
           type="submit"
           className="primary-gradient w-fit !text-light-900"
           disabled={isSubmitting}
-          // onClick={() => {
-          //   onSubmit(form.getValues());
-          // }}
         >
           {isSubmitting ? (
             <>{type === "Edit" ? "Editing..." : "Posting..."}</>

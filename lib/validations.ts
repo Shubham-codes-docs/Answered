@@ -22,3 +22,9 @@ export const QuestionSchema = z.object({
     .min(1)
     .max(2, { message: "Please select atmost 3 tags." }),
 });
+
+export const AnswerSchema = z.object({
+  answer: z.string().min(100, {
+    message: "Answer must contain atleast 100 characters.",
+  }),
+});

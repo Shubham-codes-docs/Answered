@@ -1,42 +1,27 @@
 import { Schema, Document, models, model } from "mongoose";
 
-interface IQuestion extends Document {
-  title: string;
+interface IAnswer extends Document {
+  question: Schema.Types.ObjectId;
   description: string;
-  tags: Schema.Types.ObjectId[];
-  views: number;
   upVotes: Schema.Types.ObjectId[];
   downVotes: Schema.Types.ObjectId[];
-  answers: Schema.Types.ObjectId[];
   author: Schema.Types.ObjectId;
   createdAt: Date;
 }
 
-const QuestionSchema = new Schema({
-  title: {
-    type: String,
-    required: true,
-  },
+const AnswerSchema = new Schema({
   description: {
     type: String,
     required: true,
   },
-  tags: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "Tag",
-    },
-  ],
   author: {
     type: Schema.Types.ObjectId,
     ref: "User",
   },
-  answers: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "Answer",
-    },
-  ],
+  question: {
+    type: Schema.Types.ObjectId,
+    ref: "Answer",
+  },
   upVotes: [
     {
       type: Schema.Types.ObjectId,
@@ -49,10 +34,6 @@ const QuestionSchema = new Schema({
       ref: "User",
     },
   ],
-  views: {
-    type: Number,
-    default: 0,
-  },
   createdAt: {
     type: Date,
     default: Date.now,
@@ -60,7 +41,6 @@ const QuestionSchema = new Schema({
   },
 });
 
-const Question =
-  models.Question || model<IQuestion>("Question", QuestionSchema);
+const Answer = models.Answer || model<IAnswer>("Answer", AnswerSchema);
 
-export default Question;
+export default Answer;

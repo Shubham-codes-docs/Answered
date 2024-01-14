@@ -1,7 +1,11 @@
+import Answer from "@/components/forms/Answer";
 import Metrics from "@/components/shared/Metrics";
 import ParseHtml from "@/components/shared/ParseHtml";
+import RenderTag from "@/components/shared/RenderTag";
 import { getQuestionById } from "@/lib/actions/question.action";
+import { getUserById } from "@/lib/actions/user.action";
 import { formatNumber, getTimestamp } from "@/lib/utils";
+import { auth } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -14,6 +18,12 @@ interface QuestionProps {
 
 const page = async ({ params }: QuestionProps) => {
   const res = await getQuestionById({ questionId: params.id });
+
+  const { userId: clerkId } = auth();
+
+  let dbUser;
+
+  if (clerkId) dbUser = await getUserById({ userId: clerkId });
 
   return (
     <>
@@ -64,6 +74,23 @@ const page = async ({ params }: QuestionProps) => {
         />
       </div>
       <ParseHtml data={res.question.description} />
+      <div className="mt-8 flex flex-wrap gap-2">
+        {res.question.tags.map((tag: any) => {
+          return (
+            <RenderTag
+              key={tag._id}
+              _id={tag._id}
+              name={tag.name}
+              showCount={false}
+            />
+          );
+        })}
+      </div>
+      <Answer
+        question={res.question.description}
+        questionId={JSON.stringify(res.question._id)}
+        authorId={JSON.stringify(dbUser._id)}
+      />
     </>
   );
 };
