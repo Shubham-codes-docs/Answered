@@ -1,7 +1,9 @@
 import Answer from "@/components/forms/Answer";
+import AllAnswers from "@/components/shared/AllAnswers";
 import Metrics from "@/components/shared/Metrics";
 import ParseHtml from "@/components/shared/ParseHtml";
 import RenderTag from "@/components/shared/RenderTag";
+import Votes from "@/components/shared/Votes";
 import { getQuestionById } from "@/lib/actions/question.action";
 import { getUserById } from "@/lib/actions/user.action";
 import { formatNumber, getTimestamp } from "@/lib/utils";
@@ -44,7 +46,18 @@ const page = async ({ params }: QuestionProps) => {
               {res.question.author.name}
             </p>
           </Link>
-          <div className="flex justify-end">voting</div>
+          <div className="flex justify-end">
+            <Votes
+              type="Question"
+              itemId={JSON.stringify(res.question._id)}
+              userId={JSON.stringify(dbUser._id)}
+              upvotes={res.question.upVotes.length}
+              hasUpVoted={res.question.upVotes.includes(dbUser._id)}
+              downvotes={res.question.downVotes.length}
+              hasDownVoted={res.question.downVotes.includes(dbUser._id)}
+              hasSaved={dbUser.saved.includes(res.question._id)}
+            />
+          </div>
         </div>
         <h2 className="h2-semibold text-dark200_light900 mt-3.5 w-full text-left">
           {res.question.title}
@@ -86,6 +99,11 @@ const page = async ({ params }: QuestionProps) => {
           );
         })}
       </div>
+      <AllAnswers
+        questionId={res.question._id}
+        authorId={dbUser._id}
+        totalAnswers={res.question.answers.length}
+      />
       <Answer
         question={res.question.description}
         questionId={JSON.stringify(res.question._id)}
