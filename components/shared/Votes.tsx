@@ -8,6 +8,7 @@ import {
 } from "@/lib/actions/question.action";
 import { usePathname } from "next/navigation";
 import { downVoteAnswer, upVoteAnswer } from "@/lib/actions/answer.action";
+import { toggleSaveQuestion } from "@/lib/actions/user.action";
 
 interface VotesProps {
   type: string;
@@ -76,8 +77,12 @@ const Votes = ({
     }
   };
 
-  const handleSave = () => {
-    console.log("save");
+  const handleSave = async () => {
+    await toggleSaveQuestion({
+      userId: JSON.parse(userId),
+      questionId: JSON.parse(itemId),
+      path: pathName,
+    });
   };
 
   return (
