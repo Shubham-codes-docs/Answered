@@ -15,7 +15,9 @@ const Page = async ({ params, searchParams }: URLProps) => {
   return (
     <div>
       <>
-        <h1 className="h1-bold text-dark100_light900">{res.tagTitle}</h1>
+        <h1 className="h1-bold text-dark100_light900 capitalize">
+          {res.tagTitle}
+        </h1>
         <div className="mt-11 w-full">
           <LocalSearch
             placeHolder="Search for Questions related to the tags here"
