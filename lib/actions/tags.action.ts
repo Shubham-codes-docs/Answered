@@ -2,7 +2,11 @@
 
 import User from "@/database/models/UserSchema.model";
 import { connectDB } from "../db";
-import { GetAllTagsParams, GetTopInteractedTagsParams } from "./shared.types";
+import {
+  GetAllTagsParams,
+  GetQuestionsByTagIdParams,
+  GetTopInteractedTagsParams,
+} from "./shared.types";
 import Tag from "@/database/models/TagSchema.model";
 
 export const getAllTags = async (params: GetAllTagsParams) => {
@@ -50,5 +54,47 @@ export const getTopInteractedTags = async (
   } catch (err) {
     console.log(err);
     return { tags: [] };
+  }
+};
+
+export const getQuestionsByTagId = async (
+  params: GetQuestionsByTagIdParams
+) => {
+  try {
+    connectDB();
+
+    const { tagId, page = 1, pageSize = 10, searchQuery } = params;
+
+    const tag = await Tag.findById(tagId).populate({
+      path: "questions",
+      model: "Question",
+      match: searchQuery
+        ? { title: { $regex: searchQuery, options: "i" } }
+        : {},
+      options: {
+        limit: pageSize,
+        skip: pageSize * (page - 1),
+        sort: { createdAt: -1 },
+      },
+      populate: [
+        {
+          path: "tags",
+          model: Tag,
+          select: "_id name",
+        },
+        {
+          path: "author",
+          model: User,
+          select: "_id clerkId name image",
+        },
+      ],
+    });
+
+    if (!tag) throw new Error("User not found");
+
+    return { tagTitle: tag.name, questions: tag.questions };
+  } catch (err) {
+    console.log(err);
+    throw err;
   }
 };

@@ -8,7 +8,7 @@ import { formatNumber, getTimestamp } from "@/lib/utils";
 interface QuestionProps {
   _id: string;
   title: string;
-  tags: Array<{ _id: string; name: string }>;
+  tags: Array<{ _id: string; name: string; ObjectId?: string }>;
   author: {
     _id: string;
     name: string;
