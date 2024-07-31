@@ -20,7 +20,7 @@ const AnswerSchema = new Schema({
   },
   question: {
     type: Schema.Types.ObjectId,
-    ref: "Answer",
+    ref: "Question",
   },
   upVotes: [
     {

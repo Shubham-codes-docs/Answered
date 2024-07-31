@@ -51,3 +51,11 @@ export function formatNumber(value: number): string {
     return value.toString();
   }
 }
+
+// get joined date
+export const getJoinedDate = (createdAt: Date): string => {
+  const month = createdAt.toLocaleString("default", { month: "long" });
+  const year = createdAt.getFullYear();
+  const joinedDate = `${month} ${year}`;
+  return joinedDate;
+};

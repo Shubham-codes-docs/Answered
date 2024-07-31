@@ -18,6 +18,7 @@ interface QuestionProps {
   views: number;
   answers: Array<Object>;
   createdAt: Date;
+  clerkId?: string;
 }
 
 const QuestionCard = ({
@@ -31,7 +32,7 @@ const QuestionCard = ({
   createdAt,
 }: QuestionProps) => {
   return (
-    <Card className="card-wrapper rounded-[10px] p-9 sm:px-11">
+    <Card className="card-wrapper mb-4 rounded-[10px] p-9 sm:px-11">
       <CardContent>
         <div className="flex flex-col-reverse items-start justify-between gap-5 sm:flex-row">
           <div>
