@@ -5,8 +5,8 @@ import { formatNumber, getTimestamp } from "@/lib/utils";
 import { SignedIn } from "@clerk/nextjs";
 import EditDeleteAction from "../EditDeleteAction";
 
-interface Props {
-  clerkId?: string | null;
+interface AnswerCardProps {
+  clerkId?: string;
   _id: string;
   question: {
     _id: string;
@@ -29,7 +29,7 @@ const AnswerCard = ({
   author,
   upvotes,
   createdAt,
-}: Props) => {
+}: AnswerCardProps) => {
   const showActionButtons = clerkId && clerkId === author.clerkId;
 
   return (

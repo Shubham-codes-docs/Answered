@@ -4,10 +4,12 @@ import { connectDB } from "../db";
 import {
   AnswerVoteParams,
   CreateAnswerParams,
+  DeleteAnswerParams,
   GetAnswersParams,
 } from "./shared.types";
 import Question from "@/database/models/QuestionSchema.model";
 import { revalidatePath } from "next/cache";
+import Interactions from "@/database/models/InteractionSchema.model";
 
 export const getAllAnswers = async (params: GetAnswersParams) => {
   const { questionId } = params;
@@ -111,5 +113,38 @@ export const downVoteAnswer = async (params: AnswerVoteParams) => {
     revalidatePath(path);
   } catch (err) {
     console.log(err);
+  }
+};
+
+// delete an answer
+export const deleteAnswer = async (params: DeleteAnswerParams) => {
+  try {
+    connectDB();
+
+    const { answerId, path } = params;
+
+    const answer = await Answer.findById(answerId);
+
+    if (!answer) throw new Error("Answer not found");
+
+    await Answer.deleteOne({
+      _id: answerId,
+    });
+
+    await Interactions.deleteMany({
+      answer: answerId,
+    });
+
+    await Question.updateMany(
+      { _id: answer.question },
+      { $pull: { answers: answerId } }
+    );
+
+    revalidatePath(path);
+
+    return { message: "Question deleted successfully" };
+  } catch (err) {
+    console.log(err);
+    throw err;
   }
 };

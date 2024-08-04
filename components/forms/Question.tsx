@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import Image from "next/image";
-import { createQuestion } from "@/lib/actions/question.action";
+import { createQuestion, editQuestion } from "@/lib/actions/question.action";
 import { useRouter, usePathname } from "next/navigation";
 import { useTheme } from "@/context/ThemeProvider";
 
@@ -28,7 +28,7 @@ interface Props {
   questionDetails?: string;
 }
 
-const Question = ({ userId }: Props) => {
+const Question = ({ userId, type, questionDetails }: Props) => {
   const editorRef = useRef(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const theme = useTheme();
@@ -36,13 +36,21 @@ const Question = ({ userId }: Props) => {
   const router = useRouter();
   const pathname = usePathname();
 
+  // get question details if type is edit
+  const parsedQuestionDetails = JSON.parse(questionDetails || "");
+
+  // get the question tags
+  const groupedTags = parsedQuestionDetails.question.tags.map(
+    (tag: any) => tag.name
+  );
+
   // 1. Define your form.
   const form = useForm<z.infer<typeof QuestionSchema>>({
     resolver: zodResolver(QuestionSchema),
     defaultValues: {
-      title: "",
-      description: "",
-      tags: [],
+      title: parsedQuestionDetails.question.title || "",
+      description: parsedQuestionDetails.question.description || "",
+      tags: groupedTags || [],
     },
   });
 
@@ -51,15 +59,26 @@ const Question = ({ userId }: Props) => {
     setIsSubmitting(true);
 
     try {
-      createQuestion({
-        title: values.title,
-        description: values.description,
-        tags: values.tags,
-        author: JSON.parse(userId),
-        path: pathname,
-      });
+      if (type === "Edit") {
+        await editQuestion({
+          questionId: parsedQuestionDetails.question._id,
+          title: values.title,
+          description: values.description,
+          path: pathname,
+        });
 
-      router.push("/");
+        router.push(`/questions/${parsedQuestionDetails.question._id}`);
+      } else {
+        await createQuestion({
+          title: values.title,
+          description: values.description,
+          tags: values.tags,
+          author: JSON.parse(userId),
+          path: pathname,
+        });
+
+        router.push("/");
+      }
     } catch (error) {
     } finally {
       setIsSubmitting(false);
@@ -100,8 +119,6 @@ const Question = ({ userId }: Props) => {
 
     form.setValue("tags", newTags);
   };
-
-  const type: any = "Create";
 
   return (
     <Form {...form}>
@@ -149,7 +166,9 @@ const Question = ({ userId }: Props) => {
                   }}
                   onBlur={field.onBlur}
                   onEditorChange={(content) => field.onChange(content)}
-                  initialValue={""}
+                  initialValue={
+                    parsedQuestionDetails.question.description || ""
+                  }
                   init={{
                     height: 350,
                     menubar: false,
@@ -210,10 +229,14 @@ const Question = ({ userId }: Props) => {
                         <Badge
                           key={tag}
                           className="subtle-medium background-light800_dark300 text-light400_light500 flex items-center justify-center gap-2 rounded-md border-none px-4 py-2 capitalize"
-                          onClick={() => handleTagRemove(tag, field)}
+                          onClick={
+                            type !== "Edit"
+                              ? () => handleTagRemove(tag, field)
+                              : () => {}
+                          }
                         >
                           {tag}
-                          {
+                          {type !== "Edit" && (
                             <Image
                               src="/assets/icons/close.svg"
                               alt="Close icon"
@@ -221,7 +244,7 @@ const Question = ({ userId }: Props) => {
                               height={12}
                               className="cursor-pointer object-contain invert-0 dark:invert"
                             />
-                          }
+                          )}
                         </Badge>
                       ))}
                     </div>

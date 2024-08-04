@@ -26,6 +26,7 @@ const QuestionTab = async ({
           author={question.author}
           upvotes={question.upvotes}
           views={question.views}
+          clerkId={clerkId}
           createdAt={question.createdAt}
           answers={question.answers}
         />
