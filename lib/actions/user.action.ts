@@ -184,7 +184,7 @@ export const getUserInfo = async (params: GetUserByIdParams) => {
     const { userId } = params;
 
     const user = await User.findOne({ clerkId: userId }).select(
-      "_id clerkId name image createdAt location bio websiteLink"
+      "_id clerkId name image createdAt location bio websiteLink userName"
     );
 
     if (!user) throw new Error("User not found");

@@ -35,7 +35,7 @@ const Page = async ({ params, searchParams }: URLProps) => {
               {userInfo?.user.name}
             </h2>
             <p className="paragraph-regular text-dark200_light800 mt-2">
-              @ {userInfo?.user.username}
+              @ {userInfo?.user.userName}
             </p>
 
             <div className="mt-5 flex flex-wrap items-center justify-start gap-5">
@@ -67,7 +67,7 @@ const Page = async ({ params, searchParams }: URLProps) => {
         <div className="flex justify-end max-sm:mb-5 max-sm:w-full sm:mt-3">
           <SignedIn>
             {clerkId === userInfo?.user.clerkId && (
-              <Link href={`/profile/${clerkId}/edit`}>
+              <Link href={`/profile/edit`}>
                 <Button className="paragraph-medium btn-secondary text-dark300_light900 min-h-[46px] min-w-[175px] px-4 py-3 ">
                   Edit Profile
                 </Button>

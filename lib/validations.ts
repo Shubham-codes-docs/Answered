@@ -28,3 +28,29 @@ export const AnswerSchema = z.object({
     message: "Answer must contain atleast 100 characters.",
   }),
 });
+
+export const ProfileSchema = z.object({
+  name: z
+    .string()
+    .min(5, {
+      message: "Name must contain atleast 5 characters.",
+    })
+    .max(50, {
+      message: "Name must contain less than 50 characters.",
+    }),
+  userName: z
+    .string()
+    .min(5, {
+      message: "Username must contain atleast 5 characters.",
+    })
+    .max(50, {
+      message: "Username must contain less than 50 characters.",
+    }),
+  bio: z.string().max(150, {
+    message: "Bio must contain less than 150 characters.",
+  }),
+  location: z.string().max(50, {
+    message: "Location must contain less than 50 characters.",
+  }),
+  websiteLink: z.union([z.string().url(), z.literal("")]),
+});
