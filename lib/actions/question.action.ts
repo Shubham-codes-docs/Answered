@@ -209,3 +209,19 @@ export const editQuestion = async (params: EditQuestionParams) => {
     throw err;
   }
 };
+
+// get hot questions
+export const getHotQuestions = async () => {
+  try {
+    connectDB();
+
+    const hotQuestions = await Question.find({})
+      .sort({ views: -1, upVotes: -1 })
+      .limit(5);
+
+    return { hotQuestions };
+  } catch (err) {
+    console.log(err);
+    throw err;
+  }
+};
