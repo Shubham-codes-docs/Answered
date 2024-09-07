@@ -5,8 +5,9 @@ import Card from "@/components/shared/cards/QuestionCard";
 import LocalSearch from "@/components/shared/search/LocalSearch";
 import { QuestionFilters } from "@/constants/Filters";
 import { getSavedQuestions } from "@/lib/actions/user.action";
+import { SearchParamsProps } from "@/types";
 
-const Home = async () => {
+const Home = async ({ searchParams }: SearchParamsProps) => {
   // get clerkId of the user
   const { userId: clerkId } = auth();
 
@@ -14,7 +15,10 @@ const Home = async () => {
   if (!clerkId) return null;
 
   // get all saved questions
-  const questions = await getSavedQuestions({ clerkId });
+  const questions = await getSavedQuestions({
+    clerkId,
+    searchQuery: searchParams.q,
+  });
 
   return (
     <>
@@ -22,7 +26,7 @@ const Home = async () => {
       <div className="mt-11 flex justify-between gap-5 max-sm:flex-col sm:items-center">
         <LocalSearch
           placeHolder="Search for Questions Here"
-          route="/"
+          route="/collection"
           iconPosition="left"
           otherClasses="flex-1"
           imgSrc="/assets/icons/search.svg"

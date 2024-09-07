@@ -21,7 +21,7 @@ const Page = async ({ params, searchParams }: URLProps) => {
         <div className="mt-11 w-full">
           <LocalSearch
             placeHolder="Search for Questions related to the tags here"
-            route="/"
+            route={`/tags/${params.id}`}
             iconPosition="left"
             otherClasses="flex-1"
             imgSrc="/assets/icons/search.svg"

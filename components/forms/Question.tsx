@@ -37,10 +37,11 @@ const Question = ({ userId, type, questionDetails }: Props) => {
   const pathname = usePathname();
 
   // get question details if type is edit
-  const parsedQuestionDetails = JSON.parse(questionDetails || "");
+  const parsedQuestionDetails =
+    questionDetails && JSON.parse(questionDetails || "");
 
   // get the question tags
-  const groupedTags = parsedQuestionDetails.question.tags.map(
+  const groupedTags = parsedQuestionDetails?.question.tags.map(
     (tag: any) => tag.name
   );
 
@@ -48,8 +49,8 @@ const Question = ({ userId, type, questionDetails }: Props) => {
   const form = useForm<z.infer<typeof QuestionSchema>>({
     resolver: zodResolver(QuestionSchema),
     defaultValues: {
-      title: parsedQuestionDetails.question.title || "",
-      description: parsedQuestionDetails.question.description || "",
+      title: parsedQuestionDetails?.question?.title || "",
+      description: parsedQuestionDetails?.question?.description || "",
       tags: groupedTags || [],
     },
   });
@@ -61,13 +62,13 @@ const Question = ({ userId, type, questionDetails }: Props) => {
     try {
       if (type === "Edit") {
         await editQuestion({
-          questionId: parsedQuestionDetails.question._id,
+          questionId: parsedQuestionDetails?.question._id,
           title: values.title,
           description: values.description,
           path: pathname,
         });
 
-        router.push(`/questions/${parsedQuestionDetails.question._id}`);
+        router.push(`/questions/${parsedQuestionDetails?.question._id}`);
       } else {
         await createQuestion({
           title: values.title,
@@ -167,7 +168,7 @@ const Question = ({ userId, type, questionDetails }: Props) => {
                   onBlur={field.onBlur}
                   onEditorChange={(content) => field.onChange(content)}
                   initialValue={
-                    parsedQuestionDetails.question.description || ""
+                    parsedQuestionDetails?.question?.description || ""
                   }
                   init={{
                     height: 350,

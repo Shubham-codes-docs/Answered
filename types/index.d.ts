@@ -39,6 +39,16 @@ export interface URLProps {
   searchParams: { [key: string]: string | undefined };
 }
 
+export interface UrlQueryParams {
+  params: string;
+  key: string;
+  value: string | null;
+}
+
+export interface RemoveUrlQuery {
+  params: string;
+  keysToRemove: string[];
+}
 export interface BadgeCounts {
   GOLD: number;
   SILVER: number;

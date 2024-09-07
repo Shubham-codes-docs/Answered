@@ -8,12 +8,25 @@ import {
   GetTopInteractedTagsParams,
 } from "./shared.types";
 import Tag from "@/database/models/TagSchema.model";
+import { FilterQuery } from "mongoose";
+import Question from "@/database/models/QuestionSchema.model";
 
 export const getAllTags = async (params: GetAllTagsParams) => {
   try {
     connectDB();
 
-    const tags = await Tag.find({});
+    // get params
+    const { searchQuery } = params;
+
+    // define a mongoose filter query
+    const query: FilterQuery<typeof Tag> = {};
+
+    // if searchQuery exists make a query
+    if (searchQuery) {
+      query.$or = [{ name: { $regex: new RegExp(searchQuery, "i") } }];
+    }
+
+    const tags = await Tag.find(query);
 
     return { tags };
   } catch (err) {
@@ -65,12 +78,21 @@ export const getQuestionsByTagId = async (
 
     const { tagId, page = 1, pageSize = 10, searchQuery } = params;
 
+    // create search mongoose query
+    const query: FilterQuery<typeof Question> = {};
+
+    // if searchQuery exists make a query
+    if (searchQuery) {
+      query.$or = [
+        { title: { $regex: new RegExp(searchQuery, "i") } },
+        { description: { $regex: new RegExp(searchQuery, "i") } },
+      ];
+    }
+
     const tag = await Tag.findById(tagId).populate({
       path: "questions",
       model: "Question",
-      match: searchQuery
-        ? { title: { $regex: searchQuery, options: "i" } }
-        : {},
+      match: query,
       options: {
         limit: pageSize,
         skip: pageSize * (page - 1),

@@ -22,7 +22,20 @@ export const getAllUsers = async (params: GetAllUsersParams) => {
   try {
     connectDB();
 
-    const users = await User.find({}).sort({ createdAt: -1 });
+    // get search query
+    const { searchQuery } = params;
+
+    // define searchQuery
+    const query: FilterQuery<typeof User> = {};
+
+    if (searchQuery) {
+      query.$or = [
+        { name: { $regex: new RegExp(searchQuery, "i") } },
+        { userName: { $regex: new RegExp(searchQuery, "i") } },
+      ];
+    }
+
+    const users = await User.find(query).sort({ createdAt: -1 });
     return { users };
   } catch (err) {
     console.log(err);
@@ -142,9 +155,14 @@ export const getSavedQuestions = async (params: GetSavedQuestionsParams) => {
 
     const { clerkId, page = 1, pageSize = 20, searchQuery } = params;
 
-    const query: FilterQuery<typeof Question> = searchQuery
-      ? { title: { $regex: new RegExp(searchQuery, "i") } }
-      : {};
+    const query: FilterQuery<typeof Question> = {};
+
+    if (searchQuery) {
+      query.$or = [
+        { title: { $regex: new RegExp(searchQuery, "i") } },
+        { description: { $regex: new RegExp(searchQuery, "i") } },
+      ];
+    }
 
     const user = await User.findOne({ clerkId }).populate({
       path: "saved",
