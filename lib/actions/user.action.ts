@@ -23,7 +23,7 @@ export const getAllUsers = async (params: GetAllUsersParams) => {
     connectDB();
 
     // get search query
-    const { searchQuery } = params;
+    const { searchQuery, filter } = params;
 
     // define searchQuery
     const query: FilterQuery<typeof User> = {};
@@ -35,7 +35,26 @@ export const getAllUsers = async (params: GetAllUsersParams) => {
       ];
     }
 
-    const users = await User.find(query).sort({ createdAt: -1 });
+    // get sort query
+    let sortOption = {};
+
+    // add switch case for filter
+    switch (filter) {
+      case "new_users":
+        sortOption = { createdAt: -1 };
+        break;
+      case "old_users":
+        sortOption = { createdAt: 1 };
+        break;
+      case "top_contributors":
+        sortOption = { reputation: -1 };
+        break;
+      default:
+        sortOption = { createdAt: -1 };
+        break;
+    }
+
+    const users = await User.find(query).sort(sortOption);
     return { users };
   } catch (err) {
     console.log(err);
@@ -153,7 +172,7 @@ export const getSavedQuestions = async (params: GetSavedQuestionsParams) => {
   try {
     connectDB();
 
-    const { clerkId, page = 1, pageSize = 20, searchQuery } = params;
+    const { clerkId, page = 1, pageSize = 20, searchQuery, filter } = params;
 
     const query: FilterQuery<typeof Question> = {};
 
@@ -164,13 +183,36 @@ export const getSavedQuestions = async (params: GetSavedQuestionsParams) => {
       ];
     }
 
+    let sortOptions = {};
+
+    // switch statement to sort questions based on filter
+    switch (filter) {
+      case "most_recent":
+        sortOptions = { createdAt: -1 };
+        break;
+      case "oldest":
+        sortOptions = { createdAt: 1 };
+        break;
+      case "most_voted":
+        sortOptions = { upvotes: -1 };
+        break;
+      case "viewed":
+        sortOptions = { views: -1 };
+        break;
+      case "most_answered":
+        sortOptions = { answers: -1 };
+        break;
+      default:
+        sortOptions = { createdAt: -1 };
+    }
+
     const user = await User.findOne({ clerkId }).populate({
       path: "saved",
       match: query,
       options: {
         limit: pageSize,
         skip: pageSize * (page - 1),
-        sort: { createdAt: -1 },
+        sort: sortOptions,
       },
       populate: [
         {

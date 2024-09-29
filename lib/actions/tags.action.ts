@@ -16,7 +16,7 @@ export const getAllTags = async (params: GetAllTagsParams) => {
     connectDB();
 
     // get params
-    const { searchQuery } = params;
+    const { searchQuery, filter } = params;
 
     // define a mongoose filter query
     const query: FilterQuery<typeof Tag> = {};
@@ -26,7 +26,27 @@ export const getAllTags = async (params: GetAllTagsParams) => {
       query.$or = [{ name: { $regex: new RegExp(searchQuery, "i") } }];
     }
 
-    const tags = await Tag.find(query);
+    let sortOptions = {};
+
+    // switch statement to sort questions based on filter
+    switch (filter) {
+      case "popular":
+        sortOptions = { questions: -1 };
+        break;
+      case "recent":
+        sortOptions = { createdAt: -1 };
+        break;
+      case "name":
+        sortOptions = { name: 1 };
+        break;
+      case "old":
+        sortOptions = { createdAt: 1 };
+        break;
+      default:
+        sortOptions = { createdAt: -1 };
+    }
+
+    const tags = await Tag.find(query).sort(sortOptions);
 
     return { tags };
   } catch (err) {

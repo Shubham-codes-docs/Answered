@@ -12,16 +12,37 @@ import { revalidatePath } from "next/cache";
 import Interactions from "@/database/models/InteractionSchema.model";
 
 export const getAllAnswers = async (params: GetAnswersParams) => {
-  const { questionId } = params;
+  const { questionId, filter } = params;
   try {
     connectDB();
+
+    let sortOptions = {};
+
+    // switch statement to sort questions based on filter
+    switch (filter) {
+      case "highestupvotes":
+        sortOptions = { upvotes: -1 };
+        break;
+      case "lowestupvotes":
+        sortOptions = { upvotes: 1 };
+        break;
+      case "recent":
+        sortOptions = { createdAt: -1 };
+        break;
+      case "old":
+        sortOptions = { createdAt: 1 };
+        break;
+      default:
+        sortOptions = { createdAt: -1 };
+    }
+
     const answers = await Answer.find({ question: questionId })
       .populate({
         path: "author",
         model: "User",
         select: "_id clerkId name image",
       })
-      .sort({ createdAt: -1 });
+      .sort(sortOptions);
     return { answers };
   } catch (err) {
     console.log(err);

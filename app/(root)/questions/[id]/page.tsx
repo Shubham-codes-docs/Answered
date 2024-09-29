@@ -16,9 +16,13 @@ interface QuestionProps {
   params: {
     id: string;
   };
+  searchParams: {
+    page: number;
+    filter: string;
+  };
 }
 
-const page = async ({ params }: QuestionProps) => {
+const page = async ({ params, searchParams }: QuestionProps) => {
   const res = await getQuestionById({ questionId: params.id });
 
   const { userId: clerkId } = auth();
@@ -103,6 +107,8 @@ const page = async ({ params }: QuestionProps) => {
         questionId={res.question._id}
         authorId={dbUser._id}
         totalAnswers={res.question.answers.length}
+        page={searchParams?.page}
+        filter={searchParams?.filter}
       />
       <Answer
         question={res.question.description}
