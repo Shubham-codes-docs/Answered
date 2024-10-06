@@ -16,7 +16,10 @@ export const getAllTags = async (params: GetAllTagsParams) => {
     connectDB();
 
     // get params
-    const { searchQuery, filter } = params;
+    const { searchQuery, filter, page = 1, pageSize = 1 } = params;
+
+    // calculate the number of documents to skip
+    const skipValue = (page - 1) * pageSize;
 
     // define a mongoose filter query
     const query: FilterQuery<typeof Tag> = {};
@@ -46,12 +49,20 @@ export const getAllTags = async (params: GetAllTagsParams) => {
         sortOptions = { createdAt: -1 };
     }
 
-    const tags = await Tag.find(query).sort(sortOptions);
+    const tags = await Tag.find(query)
+      .skip(skipValue)
+      .limit(pageSize)
+      .sort(sortOptions);
 
-    return { tags };
+    // calculate the total number of documents and check if there are more pages
+    const totalQuestions = await Tag.countDocuments(query);
+
+    const isNext = totalQuestions > skipValue + tags.length;
+
+    return { tags, isNext };
   } catch (err) {
     console.log(err);
-    return { tags: [] };
+    return { tags: [], isNext: false };
   }
 };
 
@@ -96,7 +107,10 @@ export const getQuestionsByTagId = async (
   try {
     connectDB();
 
-    const { tagId, page = 1, pageSize = 10, searchQuery } = params;
+    const { tagId, page = 1, pageSize = 1, searchQuery } = params;
+
+    // calculate the number of documents to skip
+    const skipValue = (page - 1) * pageSize;
 
     // create search mongoose query
     const query: FilterQuery<typeof Question> = {};
@@ -115,7 +129,7 @@ export const getQuestionsByTagId = async (
       match: query,
       options: {
         limit: pageSize,
-        skip: pageSize * (page - 1),
+        skip: skipValue,
         sort: { createdAt: -1 },
       },
       populate: [
@@ -132,9 +146,15 @@ export const getQuestionsByTagId = async (
       ],
     });
 
+    // calculate the total number of documents and check if there are more pages
+    const totalTagQuestions = await Tag.findById(tagId, "questions");
+
+    const isNext =
+      totalTagQuestions.questions.length > skipValue + tag.questions.length;
+
     if (!tag) throw new Error("User not found");
 
-    return { tagTitle: tag.name, questions: tag.questions };
+    return { tagTitle: tag.name, questions: tag.questions, isNext };
   } catch (err) {
     console.log(err);
     throw err;

@@ -23,7 +23,10 @@ export const getAllUsers = async (params: GetAllUsersParams) => {
     connectDB();
 
     // get search query
-    const { searchQuery, filter } = params;
+    const { searchQuery, filter, page = 1, pageSize = 1 } = params;
+
+    // calculate the number of documents to skip
+    const skipValue = (page - 1) * pageSize;
 
     // define searchQuery
     const query: FilterQuery<typeof User> = {};
@@ -54,8 +57,17 @@ export const getAllUsers = async (params: GetAllUsersParams) => {
         break;
     }
 
-    const users = await User.find(query).sort(sortOption);
-    return { users };
+    const users = await User.find(query)
+      .limit(pageSize)
+      .skip(skipValue)
+      .sort(sortOption);
+
+    // calculate the total number of documents and check if there are more pages
+    const totalQuestions = await User.countDocuments(query);
+
+    const isNext = totalQuestions > skipValue + users.length;
+
+    return { users, isNext };
   } catch (err) {
     console.log(err);
     throw err;
@@ -172,7 +184,10 @@ export const getSavedQuestions = async (params: GetSavedQuestionsParams) => {
   try {
     connectDB();
 
-    const { clerkId, page = 1, pageSize = 20, searchQuery, filter } = params;
+    const { clerkId, page = 1, pageSize = 10, searchQuery, filter } = params;
+
+    // calculate the number of documents to skip
+    const skipValue = (page - 1) * pageSize;
 
     const query: FilterQuery<typeof Question> = {};
 
@@ -211,7 +226,7 @@ export const getSavedQuestions = async (params: GetSavedQuestionsParams) => {
       match: query,
       options: {
         limit: pageSize,
-        skip: pageSize * (page - 1),
+        skip: skipValue,
         sort: sortOptions,
       },
       populate: [
@@ -228,9 +243,15 @@ export const getSavedQuestions = async (params: GetSavedQuestionsParams) => {
       ],
     });
 
+    // calculate the total number of documents and check if there are more pages
+    const totalSavedQuestions = await User.findOne({ clerkId }, "saved");
+
+    const isNext =
+      totalSavedQuestions.saved.length > skipValue + user.saved.length;
+
     if (!user) throw new Error("User not found");
 
-    return { savedQuestions: user.saved };
+    return { savedQuestions: user.saved, isNext };
   } catch (err) {
     console.log(err);
     throw err;
@@ -268,6 +289,9 @@ export const getUserQuestions = async (params: GetUserStatsParams) => {
 
     const { userId, page = 1, pageSize = 10 } = params;
 
+    // calculate the number of documents to skip
+    const skipValue = (page - 1) * pageSize;
+
     const totalQuestions = await Question.countDocuments({ author: userId });
 
     const userQuestions = await Question.find({ author: userId })
@@ -277,10 +301,13 @@ export const getUserQuestions = async (params: GetUserStatsParams) => {
       })
       .populate("tags", "_id name")
       .populate("author", "_id clerkId name image")
-      .skip(pageSize * (page - 1))
+      .skip(skipValue)
       .limit(pageSize);
 
-    return { totalQuestions, userQuestions };
+    // calculate the total number of documents and check if there are more pages
+    const isNext = totalQuestions > skipValue + userQuestions.length;
+
+    return { totalQuestions, userQuestions, isNext };
   } catch (err) {
     console.log(err);
     throw err;
@@ -292,7 +319,9 @@ export const getUserAnswers = async (params: GetUserStatsParams) => {
   try {
     connectDB();
 
-    const { userId, page = 1, pageSize = 1 } = params;
+    const { userId, page = 1, pageSize = 10 } = params;
+    // calculate the number of documents to skip
+    const skipValue = (page - 1) * pageSize;
 
     const totalAnswers = await Answer.countDocuments({ author: userId });
 
@@ -302,10 +331,13 @@ export const getUserAnswers = async (params: GetUserStatsParams) => {
       })
       .populate("author", "_id clerkId name image")
       .populate("question", "_id title")
-      .skip(pageSize * (page - 1))
+      .skip(skipValue)
       .limit(pageSize);
 
-    return { totalAnswers, answers: userAnswers };
+    // calculate the total number of documents and check if there are more pages
+    const isNext = totalAnswers > skipValue + userAnswers.length;
+
+    return { totalAnswers, answers: userAnswers, isNext };
   } catch (err) {
     console.log(err);
     throw err;

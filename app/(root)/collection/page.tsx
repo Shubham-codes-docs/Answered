@@ -6,6 +6,7 @@ import LocalSearch from "@/components/shared/search/LocalSearch";
 import { QuestionFilters } from "@/constants/Filters";
 import { getSavedQuestions } from "@/lib/actions/user.action";
 import { SearchParamsProps } from "@/types";
+import Pagination from "@/components/shared/Pagination";
 
 const Home = async ({ searchParams }: SearchParamsProps) => {
   // get clerkId of the user
@@ -19,6 +20,7 @@ const Home = async ({ searchParams }: SearchParamsProps) => {
     clerkId,
     searchQuery: searchParams.q,
     filter: searchParams.filter,
+    page: searchParams.page ? +searchParams.page : 1,
   });
 
   return (
@@ -60,6 +62,12 @@ const Home = async ({ searchParams }: SearchParamsProps) => {
             linkText="Ask a question"
           />
         )}
+      </div>
+      <div className="mt-10">
+        <Pagination
+          pageNumber={searchParams.page ? +searchParams.page : 1}
+          isNext={questions.isNext}
+        />
       </div>
     </>
   );
